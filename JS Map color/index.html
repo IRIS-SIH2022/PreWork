@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Event Click LatLng</title>
+    <script src="apps.js"></script>
+    <link rel="stylesheet" href="styles.css">
+    <!-- <script async defer src="https://maps.googleapis.com/maps/api/js?v=3.exp"></script> -->
+</head>
+  <body>
+      <div >Search Here</div>
+      <input type="text" id="searchBar" >
+      <button>Search Location</button><br>
+      <div id="map"></div>
+
+    <!-- Async script executes immediately and must be after any DOM elements used in callback. -->
+    <script
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB41DRUbKWJHPxaFjMAwdrzWzbVKartNGg&callback=initMap&v=weekly&channel=2&libraries=visualization"
+      async
+    ></script>
+  </body>
+</html>
