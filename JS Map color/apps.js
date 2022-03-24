@@ -415,10 +415,10 @@ function generateBoundaries(map) {
     
   const boundary6 = new google.maps.Polygon({
     paths: zone6,
-    strokeColor: "#11F100",
+    strokeColor: "#00FFFF",
     strokeOpacity: 0.8,
     strokeWeight: 2,
-    fillColor: "#11F100",
+    fillColor: "#00FFFF",
     fillOpacity: 0.2,
   });
 
