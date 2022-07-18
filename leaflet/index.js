@@ -18,7 +18,7 @@ CartoDB_DarkMatter.addTo(map);
 // add geoman controls
 map.pm.addControls({
   position: "topleft",
-  drawCircleMarker: false,
+  //   drawCircleMarker: false,
   drawCircle: false,
   drawPolyline: false,
   drawText: false,
@@ -124,6 +124,30 @@ let geoJSONLayer = [
       ],
     },
   },
+  {
+    type: "Feature",
+    properties: {
+      id: 12334,
+      state: "Uttar Pradesh",
+      distict: "Dadri",
+      block: "Block 3",
+    },
+    geometry: {
+      type: "Polygon",
+      coordinates: [
+        [
+          [77.217836, 28.63048],
+          [77.222407, 28.631165],
+          [77.22657, 28.628753],
+          [77.223372, 28.626378],
+          [77.225282, 28.622816],
+          [77.218437, 28.61985],
+          [77.212753, 28.623274],
+          [77.217836, 28.63048],
+        ],
+      ],
+    },
+  },
 ];
 
 // create layer group
@@ -139,6 +163,7 @@ let geoJSONLayer = [
 function loadData() {
   L.geoJSON(geoJSONLayer).addTo(map);
 }
+loadData();
 
 // TODO - better way to group polygons in context of zones
 
@@ -158,9 +183,22 @@ function clearMap() {
 }
 
 // get edited data
-var layers = map.pm.getGeomanLayers();
-// console.log("layers", layers);
+let layers = map.pm.getGeomanLayers();
+console.log("layers", layers);
 
+// add circle
+L.circleMarker([28.6139, 77.209], {
+  radius: 2,
+  color: "#FFB461",
+}).addTo(map);
+L.circleMarker([28.6148, 77.211], {
+  radius: 3,
+  color: "#00B5B9",
+}).addTo(map);
+L.circleMarker([28.615, 77.207], {
+  radius: 4,
+  color: "#74D173",
+}).addTo(map);
 //===========================================================================================
 
 // add custom control to map
