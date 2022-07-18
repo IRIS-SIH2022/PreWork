@@ -15,24 +15,20 @@ let CartoDB_DarkMatter = L.tileLayer(
 // add the layer to the map
 CartoDB_DarkMatter.addTo(map);
 
-// add geoman
+// add geoman controls
 map.pm.addControls({
   position: "topleft",
   drawCircle: false,
 });
 
-// copy js variable to clipboard
-function copyToClipboard(text) {
-  text = "let geoJSON = " + text;
-  window.prompt("Copy to clipboard: Ctrl+C, Enter", text);
-}
-
 // get geoJSON of geoman
 map.on("pm:create", function (e) {
   let geoJSONLayer = e.layer.toGeoJSON();
   console.log(e);
-  //   alert(JSON.stringify(geoJSON));
-  copyToClipboard(JSON.stringify(geoJSON));
+  window.prompt(
+    "Copy to clipboard: Ctrl+C, Enter",
+    JSON.stringify(geoJSONLayer)
+  );
 });
 
 // add geoJSON on leaflet
@@ -40,9 +36,10 @@ let geoJSONLayer = [
   {
     type: "Feature",
     properties: {
-      name: "Police Station 1",
-      police_station_id: "1",
       id: "1",
+      state: "Delhi",
+      distict: "North Delhi",
+      block: "Block 1",
     },
     geometry: {
       type: "Polygon",
@@ -66,9 +63,10 @@ let geoJSONLayer = [
   {
     type: "Feature",
     properties: {
-      name: "Police Station 2",
-      police_station_id: "2",
       id: "2",
+      state: "Uttar Pradesh",
+      distict: "Ghaziabad",
+      block: "Block 2",
     },
     geometry: {
       type: "Polygon",
@@ -86,8 +84,57 @@ let geoJSONLayer = [
       ],
     },
   },
+  {
+    type: "Feature",
+    properties: {
+      id: "3",
+      state: "Delhi",
+      distict: "CP",
+      block: "Block 3",
+    },
+    geometry: {
+      type: "Polygon",
+      coordinates: [
+        [
+          [77.218437, 28.61985],
+          [77.227964, 28.615024],
+          [77.227492, 28.611414],
+          [77.217965, 28.60689],
+          [77.212086, 28.610425],
+          [77.212601, 28.61706],
+          [77.218437, 28.61985],
+        ],
+      ],
+    },
+  },
 ];
-L.geoJSON(geoJSONLayer).addTo(map);
+
+// create layer group
+let allDisticts = L.geoJSON(geoJSONLayer);
+let layerGroup = L.layerGroup().addTo(map);
+layerGroup.addLayer(allDisticts);
+// remove layer group
+// map.removeLayer(layerGroup);
+
+// TODO - better way to group polygons in context of zones
+
+// filter data to add to map
+let filteredData = L.geoJSON(geoJSONLayer, {
+  filter: function (feature, layer) {
+    return feature.properties.state === "Delhi";
+  },
+});
+// filteredData.addTo(map);
+
+// clear map
+function clearMap() {
+  map.eachLayer(function (layer) {
+    if (layer instanceof L.GeoJSON) map.removeLayer(layer);
+  });
+}
+// clearMap();
+
+//===========================================================================================
 
 // add custom control to map
 L.Control.CustomControl = L.Control.extend({
