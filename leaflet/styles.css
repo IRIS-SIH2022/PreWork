@@ -1,6 +1,14 @@
+#map {
+  height: 95vh;
+}
 
-
-.custom-pin{
+.custom-pin {
   border-radius: 50%;
   animation: glow 1.5s linear infinite alternate;
+}
+
+.popupCustom .leaflet-popup-tip,
+.popupCustom .leaflet-popup-content-wrapper {
+  background: #626060;
+  color: #5e2323;
 }
