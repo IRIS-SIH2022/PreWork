@@ -26,6 +26,7 @@ map.pm.addControls({
   rotateMode: false,
   cutPolygon: false,
 });
+map.pm.removeControls();
 
 // get geoJSON of geoman
 map.on("pm:create", function (e) {
@@ -298,6 +299,10 @@ function filterMarker() {
   });
   changeView(boundaries.getBounds());
 }
+
+function toggleGeoman() {
+  map.pm.toggleControls();
+}
 //===========================================================================================
 
 // add custom control to map
@@ -311,7 +316,8 @@ L.Control.CustomControl = L.Control.extend({
     <button class="btn btn-primary" onclick="loadData()">Load Data</button>
     <button class="btn btn-primary" onclick="clearMap()">Clear Map</button>
     <button class="btn btn-primary" onclick="filterMap()">Filter Block</button>
-    <button class="btn btn-primary" onclick="filterMarker()">Filter Marker</button>`;
+    <button class="btn btn-primary" onclick="filterMarker()">Filter Marker</button>
+    <button class="btn btn-primary" onclick="toggleGeoman()">Toggle Controls</button>`;
     return container;
   },
 });
