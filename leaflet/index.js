@@ -1,6 +1,6 @@
 let map = L.map("map");
 // lat long and zoom level of the map
-map.setView([28.6139, 77.209], 16);
+map.setView([22.629799, 80.212343], 5);
 
 // dark map
 let CartoDB_DarkMatter = L.tileLayer(
@@ -83,7 +83,7 @@ let geoJSONLayer = [
       id: "2",
       state: "Uttar Pradesh",
       distict: "Ghaziabad",
-      block: "Block 2",
+      block: "Block 1",
     },
     geometry: {
       type: "Polygon",
@@ -127,7 +127,7 @@ let geoJSONLayer = [
   {
     type: "Feature",
     properties: {
-      id: 12334,
+      id: "4",
       state: "Uttar Pradesh",
       distict: "Dadri",
       block: "Block 4",
@@ -159,14 +159,6 @@ let geoJSONLayer = [
 
 // TODO - better way to group polygons in context of zones
 
-// filter data to add to map
-let filteredData = L.geoJSON(geoJSONLayer, {
-  filter: function (feature, layer) {
-    return feature.properties.state === "Delhi";
-  },
-});
-// filteredData.addTo(map);
-
 // add circle
 markers = [
   L.circleMarker([28.6139, 77.209], {
@@ -181,44 +173,81 @@ markers = [
     radius: 4,
     color: "#74D173",
   }),
+  L.circleMarker([28.629799, 77.212343], {
+    radius: 4,
+    color: "#74D173",
+  }),
 ];
 
 let setLoad = false;
+
+// clear map
+function clearMap() {
+  /// clear polygons
+  map.eachLayer(function (layer) {
+    if (layer instanceof L.GeoJSON) map.removeLayer(layer);
+  });
+
+  // clear markers
+  markers.map((marker) => {
+    marker.remove();
+  });
+
+  setLoad = false;
+}
+
+// change map view
+function changeView(bounds) {
+  map.flyToBounds(bounds, {
+    animation: true,
+    duration: 1,
+  });
+}
+
 // method 2 to add data
 function loadData() {
   if (!setLoad) {
-    L.geoJSON(geoJSONLayer).addTo(map);
+    clearMap();
+    // add boundaries
+    let boundaries = L.geoJSON(geoJSONLayer).addTo(map);
+
+    // add markers
     markers.map((marker) => {
       marker.addTo(map);
     });
     setLoad = true;
+    changeView(boundaries.getBounds());
   }
 }
-loadData();
+// loadData();
 
-// clear map
-function clearMap() {
-  map.eachLayer(function (layer) {
-    if (layer instanceof L.GeoJSON) map.removeLayer(layer);
+function filterMap() {
+  clearMap();
+  // filter data to add to map - polygon
+  let filteredData = L.geoJSON(geoJSONLayer, {
+    filter: function (feature, layer) {
+      return feature.properties.block === "Block 1";
+    },
   });
-  markers.map((marker) => {
-    marker.remove();
+  // add polygon to map
+  filteredData.addTo(map);
+
+  changeView(filteredData.getBounds());
+
+  filteredData = filteredData.toGeoJSON().features[0];
+  console.log(filteredData);
+
+  // find points inside polygon
+  let points = markers.filter((marker) => {
+    return turf.booleanPointInPolygon(
+      Object.values(marker.getLatLng()).reverse(),
+      filteredData
+    );
   });
-  setLoad = false;
-}
 
-let newLocation = geoJSONLayer.filter((feature) => {
-  return feature.properties.block === "Block 2";
-})[0];
-
-let center = turf.center(newLocation).geometry.coordinates.reverse();
-
-console.log(center);
-// change map view
-function changeView() {
-  map.flyTo(center, map.getZoom(), {
-    animation: true,
-    duration: 1,
+  // add markers to map
+  points.map((marker) => {
+    marker.addTo(map);
   });
 }
 //===========================================================================================
@@ -233,7 +262,7 @@ L.Control.CustomControl = L.Control.extend({
     container.innerHTML = `
     <button class="btn btn-primary" onclick="loadData()">Load Data</button>
     <button class="btn btn-primary" onclick="clearMap()">Clear Map</button>
-    <button class="btn btn-primary" onclick="changeView()">Change View</button>`;
+    <button class="btn btn-primary" onclick="filterMap()">Filter</button>`;
     return container;
   },
 });
