@@ -18,13 +18,30 @@ CartoDB_DarkMatter.addTo(map);
 // add geoman controls
 map.pm.addControls({
   position: "topleft",
+  drawCircleMarker: false,
   drawCircle: false,
+  drawPolyline: false,
+  drawText: false,
+  dragMode: false,
+  rotateMode: false,
+  cutPolygon: false,
 });
 
 // get geoJSON of geoman
 map.on("pm:create", function (e) {
+  let id = 12334; // generate uuid for the polygon
   let geoJSONLayer = e.layer.toGeoJSON();
-  console.log(e);
+  geoJSONLayer.properties.id = id;
+
+  window.prompt(
+    "Copy to clipboard: Ctrl+C, Enter",
+    JSON.stringify(geoJSONLayer)
+  );
+});
+
+// listen edit event
+map.on("pm:edit", function (e) {
+  let geoJSONLayer = e.layer.toGeoJSON();
   window.prompt(
     "Copy to clipboard: Ctrl+C, Enter",
     JSON.stringify(geoJSONLayer)
@@ -110,11 +127,18 @@ let geoJSONLayer = [
 ];
 
 // create layer group
-let allDisticts = L.geoJSON(geoJSONLayer);
-let layerGroup = L.layerGroup().addTo(map);
-layerGroup.addLayer(allDisticts);
+// let allDisticts = L.geoJSON(geoJSONLayer);
+// let layerGroup = L.layerGroup().addTo(map);
+// layerGroup.addLayer(allDisticts);
 // remove layer group
 // map.removeLayer(layerGroup);
+
+// method 2
+// add geoJSON on leaflet
+
+function loadData() {
+  L.geoJSON(geoJSONLayer).addTo(map);
+}
 
 // TODO - better way to group polygons in context of zones
 
@@ -132,22 +156,23 @@ function clearMap() {
     if (layer instanceof L.GeoJSON) map.removeLayer(layer);
   });
 }
-// clearMap();
+
+// get edited data
+var layers = map.pm.getGeomanLayers();
+// console.log("layers", layers);
 
 //===========================================================================================
 
 // add custom control to map
 L.Control.CustomControl = L.Control.extend({
   options: {
-    position: "topleft",
+    position: "topright",
   },
   onAdd: function (map) {
-    var container = L.DomUtil.create("div", "leaflet-bar leaflet-control");
-    container.innerHTML =
-      '<a href="#" class="leaflet-bar-part leaflet-bar-part-single" id="geoman-button">' +
-      '<i class="fas fa-map-marked-alt"> && ' +
-      "</i>" +
-      "</a>";
+    var container = L.DomUtil.create("div", "leaflet-bar clear-map");
+    container.innerHTML = `
+    <button class="btn btn-primary" onclick="loadData()">Load Data</button>
+    <button class="btn btn-primary" onclick="clearMap()">Clear Map</button>`;
     return container;
   },
 });
