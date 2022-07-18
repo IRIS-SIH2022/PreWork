@@ -292,7 +292,7 @@ function filterMarker() {
   clearMap();
   let boundaries = loadBoundaries();
   let filteredData = markers.filter(
-    (marker) => marker.options.color == "#74D173"
+    (marker) => marker.options.crime == "Assault"
   );
   filteredData.map((marker) => {
     marker.addTo(map);
@@ -327,8 +327,8 @@ L.control.CustomControl = function (options) {
 L.control.CustomControl().addTo(map);
 
 function createCustomMarker(lat, lng, crime, time) {
-  crimeColors = { Murder: "#c30b82", Assault: "#74D173" };
-  icon = L.divIcon({
+  const crimeColors = { Murder: "#c30b82", Assault: "#74D173" };
+  const icon = L.divIcon({
     className: "custom-div-icon",
     html: `<div  class='custom-pin'  style="height:${8}px; width:${8}px; background-color:${
       crimeColors[crime]
@@ -341,8 +341,8 @@ function createCustomMarker(lat, lng, crime, time) {
   // })
 
   const newMarker = L.marker([lat, lng], {
-    icon: icon,
-    color: crimeColors[crime],
+    icon,
+    crime,
   }).bindPopup("Some info");
 
   return newMarker;
