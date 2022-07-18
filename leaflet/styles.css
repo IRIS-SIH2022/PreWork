@@ -1,0 +1,6 @@
+
+
+.custom-pin{
+  border-radius: 50%;
+  animation: glow 1.5s linear infinite alternate;
+}

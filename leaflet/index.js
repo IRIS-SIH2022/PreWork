@@ -160,7 +160,7 @@ let geoJSONLayer = [
 // TODO - better way to group polygons in context of zones
 
 // add circle
-markers = [
+let markers = [
   L.circleMarker([28.6139, 77.209], {
     radius: 2,
     color: "#FFB461",
@@ -178,6 +178,12 @@ markers = [
     color: "#74D173",
   }),
 ];
+
+oldTime = new Date()
+const newMarker = createCustomMarker(28.624,77.20,'Murder','TIME HERE',L);
+const newMarker2 = createCustomMarker(28.614,77.20,'Assault','TIME HERE',L);
+markers.push(newMarker)
+markers.push(newMarker2)
 
 let setLoad = false;
 
@@ -270,3 +276,22 @@ L.control.CustomControl = function (options) {
   return new L.Control.CustomControl(options);
 };
 L.control.CustomControl().addTo(map);
+
+function createCustomMarker(lat, lng, crime, time, L){
+  crimeColors = {'Murder':"#c30b82",'Assault':'#74D173'}
+  icon = L.divIcon({
+    className: 'custom-div-icon',
+    html: `<div  class='custom-pin'  style="height:${8}px; width:${8}px; background-color:${crimeColors[crime]};box-shadow: 0px 0px 3px 2px ${crimeColors[crime]};"></div>`
+  });
+
+  // const newMarker = L.circleMarker([lat, lng], {
+  //   radius: 4,
+  //   color: "#74D173",
+  // })
+
+  const newMarker = L.marker([lat, lng], {
+    icon:icon
+  })
+  
+  return newMarker;
+}
