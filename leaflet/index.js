@@ -1,6 +1,6 @@
 let map = L.map("map");
 // lat long and zoom level of the map
-map.setView([28.6139, 77.209], 14);
+map.setView([28.6139, 77.209], 16);
 
 // dark map
 let CartoDB_DarkMatter = L.tileLayer(
@@ -130,7 +130,7 @@ let geoJSONLayer = [
       id: 12334,
       state: "Uttar Pradesh",
       distict: "Dadri",
-      block: "Block 3",
+      block: "Block 4",
     },
     geometry: {
       type: "Polygon",
@@ -157,14 +157,6 @@ let geoJSONLayer = [
 // remove layer group
 // map.removeLayer(layerGroup);
 
-// method 2
-// add geoJSON on leaflet
-
-function loadData() {
-  L.geoJSON(geoJSONLayer).addTo(map);
-}
-loadData();
-
 // TODO - better way to group polygons in context of zones
 
 // filter data to add to map
@@ -175,30 +167,60 @@ let filteredData = L.geoJSON(geoJSONLayer, {
 });
 // filteredData.addTo(map);
 
+// add circle
+markers = [
+  L.circleMarker([28.6139, 77.209], {
+    radius: 2,
+    color: "#FFB461",
+  }),
+  L.circleMarker([28.6148, 77.211], {
+    radius: 3,
+    color: "#00B5B9",
+  }),
+  L.circleMarker([28.615, 77.207], {
+    radius: 4,
+    color: "#74D173",
+  }),
+];
+
+let setLoad = false;
+// method 2 to add data
+function loadData() {
+  if (!setLoad) {
+    L.geoJSON(geoJSONLayer).addTo(map);
+    markers.map((marker) => {
+      marker.addTo(map);
+    });
+    setLoad = true;
+  }
+}
+loadData();
+
 // clear map
 function clearMap() {
   map.eachLayer(function (layer) {
     if (layer instanceof L.GeoJSON) map.removeLayer(layer);
   });
+  markers.map((marker) => {
+    marker.remove();
+  });
+  setLoad = false;
 }
 
-// get edited data
-let layers = map.pm.getGeomanLayers();
-console.log("layers", layers);
+let newLocation = geoJSONLayer.filter((feature) => {
+  return feature.properties.block === "Block 2";
+})[0];
 
-// add circle
-L.circleMarker([28.6139, 77.209], {
-  radius: 2,
-  color: "#FFB461",
-}).addTo(map);
-L.circleMarker([28.6148, 77.211], {
-  radius: 3,
-  color: "#00B5B9",
-}).addTo(map);
-L.circleMarker([28.615, 77.207], {
-  radius: 4,
-  color: "#74D173",
-}).addTo(map);
+let center = turf.center(newLocation).geometry.coordinates.reverse();
+
+console.log(center);
+// change map view
+function changeView() {
+  map.flyTo(center, map.getZoom(), {
+    animation: true,
+    duration: 1,
+  });
+}
 //===========================================================================================
 
 // add custom control to map
@@ -210,7 +232,8 @@ L.Control.CustomControl = L.Control.extend({
     var container = L.DomUtil.create("div", "leaflet-bar clear-map");
     container.innerHTML = `
     <button class="btn btn-primary" onclick="loadData()">Load Data</button>
-    <button class="btn btn-primary" onclick="clearMap()">Clear Map</button>`;
+    <button class="btn btn-primary" onclick="clearMap()">Clear Map</button>
+    <button class="btn btn-primary" onclick="changeView()">Change View</button>`;
     return container;
   },
 });
