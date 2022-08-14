@@ -1,7 +1,4 @@
-let map = L.map("map");
 // lat long and zoom level of the map
-map.setView([22.629799, 80.212343], 5);
-
 // dark map
 let CartoDB_DarkMatter = L.tileLayer(
   "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
@@ -12,13 +9,45 @@ let CartoDB_DarkMatter = L.tileLayer(
   }
 );
 
+var testData = {
+  max: 8,
+  data: [{lat: 22.6408, lng:80.7728, count: 3},{lat: 22.75, lng:87.55, count: 1}]
+};
+
+
+var cfg = {
+  // radius should be small ONLY if scaleRadius is true (or small radius is intended)
+  // if scaleRadius is false it will be the constant radius used in pixels
+  "radius": 2,
+  "maxOpacity": .8,
+  // scales the radius based on map zoom
+  "scaleRadius": true,
+  // if set to false the heatmap uses the global maximum for colorization
+  // if activated: uses the data maximum within the current map boundaries
+  //   (there will always be a red spot with useLocalExtremas true)
+  "useLocalExtrema": true,
+  // which field name in your data represents the latitude - default "lat"
+  latField: 'lat',
+  // which field name in your data represents the longitude - default "lng"
+  lngField: 'lng',
+  // which field name in your data represents the data value - default "value"
+  valueField: 'count'
+};
+var heatmapLayer = new HeatmapOverlay(cfg);
+
+heatmapLayer.setData(testData);
+let map = L.map("map", {
+  center: new L.LatLng(22.629799, 80.212343),
+  zoom: 4,
+  layers: [CartoDB_DarkMatter, heatmapLayer]
+});
 // add the layer to the map
 CartoDB_DarkMatter.addTo(map);
 
 // add geoman controls
 map.pm.addControls({
   position: "topleft",
-  drawCircleMarker: false,
+  //   drawCircleMarker: false,
   drawCircle: false,
   drawPolyline: false,
   drawText: false,
@@ -26,7 +55,6 @@ map.pm.addControls({
   rotateMode: false,
   cutPolygon: false,
 });
-map.pm.removeControls();
 
 // get geoJSON of geoman
 map.on("pm:create", function (e) {
@@ -84,7 +112,7 @@ let geoJSONLayer = [
       id: "2",
       state: "Uttar Pradesh",
       distict: "Ghaziabad",
-      block: "Block 2",
+      block: "Block 1",
     },
     geometry: {
       type: "Polygon",
@@ -161,56 +189,30 @@ let geoJSONLayer = [
 // TODO - better way to group polygons in context of zones
 
 // add circle
-
-let markerData = [
-  {
-    lat: 28.6139,
-    lng: 77.209,
-    crime: "Murder",
-    time: "",
-    intensity: "",
-  },
-  {
-    lat: 28.6148,
-    lng: 77.211,
-    crime: "Murder",
-    time: "",
-    intensity: "",
-  },
-  {
-    lat: 28.615,
-    lng: 77.207,
-    crime: "Assault",
-    time: "",
-    intensity: "",
-  },
-  {
-    lat: 28.629799,
-    lng: 77.212343,
-    crime: "Assault",
-    time: "",
-    intensity: "",
-  },
-  {
-    lat: 28.625,
-    lng: 77.2,
-    crime: "Murder",
-    time: "",
-    intensity: "",
-  },
-  {
-    lat: 28.614,
-    lng: 77.203,
-    crime: "Assault",
-    time: "",
-    intensity: "",
-  },
+let markers = [
+  L.circleMarker([28.6139, 77.209], {
+    radius: 2,
+    color: "#FFB461",
+  }),
+  L.circleMarker([28.6148, 77.211], {
+    radius: 3,
+    color: "#00B5B9",
+  }),
+  L.circleMarker([28.615, 77.207], {
+    radius: 4,
+    color: "#74D173",
+  }),
+  L.circleMarker([28.629799, 77.212343], {
+    radius: 4,
+    color: "#74D173",
+  }),
 ];
-let markers = markerData.map((marker) =>
-  createCustomMarker(marker.lat, marker.lng, marker.crime, marker.time)
-);
 
-oldTime = new Date();
+oldTime = new Date()
+const newMarker = createCustomMarker(28.624,77.20,'Murder','TIME HERE',L);
+const newMarker2 = createCustomMarker(28.614,77.20,'Assault','TIME HERE',L);
+markers.push(newMarker)
+markers.push(newMarker2)
 
 let setLoad = false;
 
@@ -220,10 +222,12 @@ function clearMap() {
   map.eachLayer(function (layer) {
     if (layer instanceof L.GeoJSON) map.removeLayer(layer);
   });
+
   // clear markers
   markers.map((marker) => {
     marker.remove();
   });
+
   setLoad = false;
 }
 
@@ -236,28 +240,21 @@ function changeView(bounds) {
 }
 
 // method 2 to add data
-
-function loadBoundaries() {
-  return L.geoJSON(geoJSONLayer).addTo(map);
-}
-
-function loadMarkers() {
-  // add markers
-  markers.map((marker) => {
-    marker.addTo(map);
-  });
-}
 function loadData() {
   if (!setLoad) {
     clearMap();
     // add boundaries
-    let boundaries = loadBoundaries();
-    loadMarkers();
+    let boundaries = L.geoJSON(geoJSONLayer).addTo(map);
+
+    // add markers
+    markers.map((marker) => {
+      marker.addTo(map);
+    });
     setLoad = true;
     changeView(boundaries.getBounds());
   }
 }
-loadData();
+// loadData();
 
 function filterMap() {
   clearMap();
@@ -273,6 +270,7 @@ function filterMap() {
   changeView(filteredData.getBounds());
 
   filteredData = filteredData.toGeoJSON().features[0];
+  console.log(filteredData);
 
   // find points inside polygon
   let points = markers.filter((marker) => {
@@ -287,22 +285,6 @@ function filterMap() {
     marker.addTo(map);
   });
 }
-
-function filterMarker() {
-  clearMap();
-  let boundaries = loadBoundaries();
-  let filteredData = markers.filter(
-    (marker) => marker.options.crime == "Assault"
-  );
-  filteredData.map((marker) => {
-    marker.addTo(map);
-  });
-  changeView(boundaries.getBounds());
-}
-
-function toggleGeoman() {
-  map.pm.toggleControls();
-}
 //===========================================================================================
 
 // add custom control to map
@@ -315,9 +297,7 @@ L.Control.CustomControl = L.Control.extend({
     container.innerHTML = `
     <button class="btn btn-primary" onclick="loadData()">Load Data</button>
     <button class="btn btn-primary" onclick="clearMap()">Clear Map</button>
-    <button class="btn btn-primary" onclick="filterMap()">Filter Block</button>
-    <button class="btn btn-primary" onclick="filterMarker()">Filter Marker</button>
-    <button class="btn btn-primary" onclick="toggleGeoman()">Toggle Controls</button>`;
+    <button class="btn btn-primary" onclick="filterMap()">Filter</button>`;
     return container;
   },
 });
@@ -326,13 +306,11 @@ L.control.CustomControl = function (options) {
 };
 L.control.CustomControl().addTo(map);
 
-function createCustomMarker(lat, lng, crime, time) {
-  const crimeColors = { Murder: "#c30b82", Assault: "#74D173" };
-  const icon = L.divIcon({
-    className: "custom-div-icon",
-    html: `<div  class='custom-pin'  style="height:${8}px; width:${8}px; background-color:${
-      crimeColors[crime]
-    };box-shadow: 0px 0px 3px 2px ${crimeColors[crime]};"></div>`,
+function createCustomMarker(lat, lng, crime, time, L){
+  crimeColors = {'Murder':"#c30b82",'Assault':'#74D173'}
+  icon = L.divIcon({
+    className: 'custom-div-icon',
+    html: `<div  class='custom-pin'  style="height:${8}px; width:${8}px; background-color:${crimeColors[crime]};box-shadow: 0px 0px 3px 2px ${crimeColors[crime]};"></div>`
   });
 
   // const newMarker = L.circleMarker([lat, lng], {
@@ -341,9 +319,8 @@ function createCustomMarker(lat, lng, crime, time) {
   // })
 
   const newMarker = L.marker([lat, lng], {
-    icon,
-    crime,
-  }).bindPopup("Some info");
-
+    icon:icon
+  })
+  
   return newMarker;
 }
