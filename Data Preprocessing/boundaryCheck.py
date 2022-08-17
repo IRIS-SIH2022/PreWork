@@ -13,7 +13,8 @@ def boundaryFilling():
         stationID = checkBoundary(str(lat), str(lng))
         df.loc[i,'StationID'] = stationID
         if(i%1000==0):
-          df.to_csv('out.csv')
+            print("1000 added")
+            df.to_csv('out.csv')
 
 def checkBoundary(lat,lng):
   result = subprocess.run(['node', 'boundaryCheck.js',lat,lng], stdout=subprocess.PIPE).stdout.decode('utf-8')
