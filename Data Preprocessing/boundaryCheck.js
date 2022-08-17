@@ -1,15 +1,33 @@
-function isMarkerInsidePolygon(x, y, poly) {
-  var inside = false;
-  for (var ii = 0; ii < poly.length; ii++) {
-    var polyPoints = poly[ii];
-    for (var i = 0, j = polyPoints.length - 1; i < polyPoints.length; j = i++) {
-      var xi = polyPoints[i].lat, yi = polyPoints[i].lng;
-      var xj = polyPoints[j].lat, yj = polyPoints[j].lng;
+// function isMarkerInsidePolygon(x, y, poly) {
+//   var inside = false;
+//   for (var ii = 0; ii < poly.length; ii++) {
+//     var polyPoints = poly[ii];
+//     for (var i = 0, j = polyPoints.length - 1; i < polyPoints.length; j = i++) {
+//       var xi = polyPoints[i].lat, yi = polyPoints[i].lng;
+//       var xj = polyPoints[j].lat, yj = polyPoints[j].lng;
 
+//       var intersect = ((yi > y) != (yj > y))
+//         && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+//       if (intersect) inside = !inside;
+//     }
+//   }
+
+//   return inside;
+// };
+
+function isMarkerInsidePolygon(y,x, vs) {
+  // ray-casting algorithm based on
+  // https://wrf.ecse.rpi.edu/Research/Short_Notes/pnpoly.html/pnpoly.html
+  
+  
+  var inside = false;
+  for (var i = 0, j = vs.length - 1; i < vs.length; j = i++) {
+      var xi = vs[i][0], yi = vs[i][1];
+      var xj = vs[j][0], yj = vs[j][1];
+      
       var intersect = ((yi > y) != (yj > y))
-        && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+          && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
       if (intersect) inside = !inside;
-    }
   }
 
   return inside;
@@ -729,19 +747,22 @@ const polyDataRaw = [
 var args = process.argv.slice(2);
 
 let flag = 0;
-
+let polygonID;
 function checkBoundaryForAll() {
 
   for (let i = 0; i < polyDataRaw.length; i++) {
-    currentPolyData = polyDataRaw[0].geometry.coordinates[0]
+    currentPolyData = polyDataRaw[i].geometry.coordinates[0]
     const result = isMarkerInsidePolygon(args[0], args[1], currentPolyData);
-    if (result == true) {
-      flag == 1;;
+    if (result) {
+      flag = 1;
+      polygonID = polyDataRaw[i].stationID;
       break;
     }
   }
   console.log(flag)
-
+  if(flag){
+    console.log(polygonID)
+  }
 }
 
 checkBoundaryForAll()
