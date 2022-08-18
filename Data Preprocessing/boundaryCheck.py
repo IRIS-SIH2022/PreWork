@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import subprocess
 
-df = pd.read_csv("bigData.csv")
+df = pd.read_csv("data.csv")
 
 
 def boundaryFilling():
@@ -13,6 +13,7 @@ def boundaryFilling():
         stationID = checkBoundary(str(lat), str(lng))
         df.loc[i,'StationID'] = stationID
         if(i%1000==0):
+          print("1000 added")
           df.to_csv('out.csv')
 
 def checkBoundary(lat,lng):
